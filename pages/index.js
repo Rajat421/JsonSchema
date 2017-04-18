@@ -4,6 +4,8 @@ import { initStore } from '../store'
 import cookie from 'cookie'
 import TextField from 'react-md/lib/TextFields';
 import Head from 'next/head'
+import JSONTree from 'react-json-tree'
+import _ from 'underscore'
 
 export default class extends React.Component {
 
@@ -14,13 +16,59 @@ export default class extends React.Component {
   constructor(props){
     super()
     this._handleSchema=this._handleSchema.bind(this)
+    this.state= {
+      json: {},
+      globalvar: {},
+      paths:[],
+      operations:[],
+    }
     this.json={}
+
+
   }
 
   _handleSchema(val){
     this.json = JSON.parse(val)
-    console.log(this.json,'==========>')
+    this.setState({
+      json:this.json
+    },()=>{
+      this._setGlobalVariable(this.state.json)
+      this._setRequestUrls(this.state.json.paths)
+    })
+
   }
+  _setRequestUrls(path){
+    let temp=[]
+
+  _.each(path,(value,key)=>{
+    let op=[]
+    if(_.isObject(value)){
+      _.each(value,(operation,operationName)=>{
+        op.push({[operationName]:operation})
+      })
+    }
+    temp.push({[key]:op})
+    })
+  this.setState({paths:temp})
+    console.log(temp)
+
+  }
+  _setGlobalVariable(json){
+
+    let obj={
+      host:json.host,
+      basePath:json.basePath||'',
+      schemes:json.schemes||[],
+      responseContentType:json.consumes||[],
+      requestContentType:json.produces||[],
+    }
+    this.setState({
+      globalvar:obj
+    })
+
+  }
+
+
 
   render () {
     return (
@@ -45,6 +93,15 @@ export default class extends React.Component {
                   onChange={this._handleSchema}
               />
             </div>
+          </div>
+          <div className="md-grid">
+            <JSONTree data={this.state.json}/>
+            </div>
+          <div className="md-grid">
+            <JSONTree data={this.state.globalvar}/>
+          </div>
+          <div className="md-grid">
+
           </div>
         </div>
     )

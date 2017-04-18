@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
 var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
 var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -52,6 +56,14 @@ var _head = require('next/dist/lib/head.js');
 
 var _head2 = _interopRequireDefault(_head);
 
+var _reactJsonTree = require('react-json-tree');
+
+var _reactJsonTree2 = _interopRequireDefault(_reactJsonTree);
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _class = function (_React$Component) {
@@ -89,15 +101,61 @@ var _class = function (_React$Component) {
     var _this = (0, _possibleConstructorReturn3.default)(this, (_class.__proto__ || (0, _getPrototypeOf2.default)(_class)).call(this));
 
     _this._handleSchema = _this._handleSchema.bind(_this);
+    _this.state = {
+      json: {},
+      globalvar: {},
+      paths: [],
+      operations: []
+    };
     _this.json = {};
+
     return _this;
   }
 
   (0, _createClass3.default)(_class, [{
     key: '_handleSchema',
     value: function _handleSchema(val) {
+      var _this2 = this;
+
       this.json = JSON.parse(val);
-      console.log(this.json, '==========>');
+      this.setState({
+        json: this.json
+      }, function () {
+        _this2._setGlobalVariable(_this2.state.json);
+        _this2._setRequestUrls(_this2.state.json.paths);
+      });
+    }
+  }, {
+    key: '_setRequestUrls',
+    value: function _setRequestUrls(path) {
+      var temp = [];
+
+      _underscore2.default.each(path, function (value, key) {
+        var op = [];
+        if (_underscore2.default.isObject(value)) {
+          _underscore2.default.each(value, function (operation, operationName) {
+            op.push((0, _defineProperty3.default)({}, operationName, operation));
+          });
+        }
+        temp.push((0, _defineProperty3.default)({}, key, op));
+      });
+      this.setState({ paths: temp });
+      console.log(temp);
+    }
+  }, {
+    key: '_setGlobalVariable',
+    value: function _setGlobalVariable(json) {
+
+      var obj = {
+        host: json.host,
+        basePath: json.basePath || '',
+        schemes: json.schemes || [],
+        responseContentType: json.consumes || [],
+        requestContentType: json.produces || []
+      };
+      this.setState({
+        globalvar: obj
+      });
     }
   }, {
     key: 'render',
@@ -108,7 +166,7 @@ var _class = function (_React$Component) {
         rows: 4,
         maxRows: 4,
         onChange: this._handleSchema
-      }))));
+      }))), _react2.default.createElement('div', { className: 'md-grid' }, _react2.default.createElement(_reactJsonTree2.default, { data: this.state.json })), _react2.default.createElement('div', { className: 'md-grid' }, _react2.default.createElement(_reactJsonTree2.default, { data: this.state.globalvar })), _react2.default.createElement('div', { className: 'md-grid' }));
     }
   }]);
 
