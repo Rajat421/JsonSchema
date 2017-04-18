@@ -44,10 +44,10 @@ export default class extends React.Component {
     let op=[]
     if(_.isObject(value)){
       _.each(value,(operation,operationName)=>{
-        op.push({[operationName]:operation})
+        op.push({key:operationName,operation})
       })
     }
-    temp.push({[key]:op})
+    temp.push({key:key,op})
     })
   this.setState({paths:temp})
     console.log(temp)
@@ -94,15 +94,32 @@ export default class extends React.Component {
               />
             </div>
           </div>
-          <div className="md-grid">
+          <div>
+            <h2>Full Schema</h2>
             <JSONTree data={this.state.json}/>
             </div>
-          <div className="md-grid">
+          <div >
+            <h2>Global Schema</h2>
+
             <JSONTree data={this.state.globalvar}/>
           </div>
-          <div className="md-grid">
+          {this.state.paths.map((val,i)=>(
+              <div>
+                <h2>{val.key||''}</h2>
 
-          </div>
+                {val.op.map((operation,k)=>(
+                    <div>
+                      <h2>{operation.key||''}</h2>
+
+                      <JSONTree data={operation.operation||''}/>
+                    </div>
+                ))
+                }
+
+              </div>
+          ))
+
+          }
         </div>
     )
   }

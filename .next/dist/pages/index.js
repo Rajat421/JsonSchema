@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
 var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -134,10 +130,10 @@ var _class = function (_React$Component) {
         var op = [];
         if (_underscore2.default.isObject(value)) {
           _underscore2.default.each(value, function (operation, operationName) {
-            op.push((0, _defineProperty3.default)({}, operationName, operation));
+            op.push({ key: operationName, operation: operation });
           });
         }
-        temp.push((0, _defineProperty3.default)({}, key, op));
+        temp.push({ key: key, op: op });
       });
       this.setState({ paths: temp });
       console.log(temp);
@@ -166,7 +162,11 @@ var _class = function (_React$Component) {
         rows: 4,
         maxRows: 4,
         onChange: this._handleSchema
-      }))), _react2.default.createElement('div', { className: 'md-grid' }, _react2.default.createElement(_reactJsonTree2.default, { data: this.state.json })), _react2.default.createElement('div', { className: 'md-grid' }, _react2.default.createElement(_reactJsonTree2.default, { data: this.state.globalvar })), _react2.default.createElement('div', { className: 'md-grid' }));
+      }))), _react2.default.createElement('div', null, _react2.default.createElement('h2', null, 'Full Schema'), _react2.default.createElement(_reactJsonTree2.default, { data: this.state.json })), _react2.default.createElement('div', null, _react2.default.createElement('h2', null, 'Global Schema'), _react2.default.createElement(_reactJsonTree2.default, { data: this.state.globalvar })), this.state.paths.map(function (val, i) {
+        return _react2.default.createElement('div', null, _react2.default.createElement('h2', null, val.key || ''), val.op.map(function (operation, k) {
+          return _react2.default.createElement('div', null, _react2.default.createElement('h2', null, operation.key || ''), _react2.default.createElement(_reactJsonTree2.default, { data: operation.operation || '' }));
+        }));
+      }));
     }
   }]);
 
