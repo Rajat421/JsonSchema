@@ -1,12 +1,17 @@
 import React from 'react'
-import { Provider } from 'react-redux'
-import { initStore } from '../store'
-import cookie from 'cookie'
+import Dialog from 'react-md/lib/Dialogs';
+import Button from 'react-md/lib/Buttons/Button';
+import List from 'react-md/lib/Lists/List';
+import ListItem from 'react-md/lib/Lists/ListItem';
 import TextField from 'react-md/lib/TextFields';
+import Toolbar from 'react-md/lib/Toolbars';
 import Head from 'next/head'
 import JSONTree from 'react-json-tree'
-import _ from 'underscore'
+import FontIcon from 'react-md/lib/FontIcons'
 
+
+import _ from 'underscore'
+import  Form from '../component/form'
 export default class extends React.Component {
 
   static async getInitialProps (args) {
@@ -16,11 +21,15 @@ export default class extends React.Component {
   constructor(props){
     super()
     this._handleSchema=this._handleSchema.bind(this)
+    this.openDialog=this.openDialog.bind(this)
+    this.closeDialog=this.closeDialog.bind(this)
     this.state= {
       json: {},
       globalvar: {},
       paths:[],
       operations:[],
+      visible:false,
+      parameters:[]
     }
     this.json={}
 
@@ -68,9 +77,17 @@ export default class extends React.Component {
 
   }
 
+  openDialog = (parameters) => {
+    this.setState({parameters,visible:true});
+  };
 
+  closeDialog = () => {
+    this.setState({visible:false});
+  };
 
   render () {
+    const nav = <Button icon onClick={this.closeDialog}>X</Button>;
+    const action = <Button flat label="Save" onClick={this.closeDialog} />;
     return (
         <div>
           <Head>
@@ -104,17 +121,38 @@ export default class extends React.Component {
             <JSONTree data={this.state.globalvar}/>
           </div>
           {this.state.paths.map((val,i)=>(
-              <div>
+              <div key={i}>
                 <h2>{val.key||''}</h2>
 
                 {val.op.map((operation,k)=>(
-                    <div>
+                    <div key={k}>
                       <h2>{operation.key||''}</h2>
 
                       <JSONTree data={operation.operation||''}/>
+                      <Button raised label="Try Operation"
+                              onClick={()=>this.openDialog(operation.operation.parameters)} />
+
                     </div>
                 ))
+
                 }
+                <Dialog
+                    id={'Dialog'}
+                    visible={this.state.visible}
+                    fullPage
+                    aria-label="New Event"
+                    onHide={this.closeDialog}
+                >
+                  <Toolbar
+                      colored
+                      nav={nav}
+                      actions={action}
+                      title="New Event"
+                      fixed
+                  />
+                  <Form parameters={this.state.parameters||[]}/>
+
+                </Dialog>
 
               </div>
           ))
