@@ -1,18 +1,14 @@
-import React from 'react'
-import Dialog from 'react-md/lib/Dialogs';
-import Button from 'react-md/lib/Buttons/Button';
-import List from 'react-md/lib/Lists/List';
-import ListItem from 'react-md/lib/Lists/ListItem';
-import TextField from 'react-md/lib/TextFields';
-import Toolbar from 'react-md/lib/Toolbars';
-import Head from 'next/head'
-import JSONTree from 'react-json-tree'
-import FontIcon from 'react-md/lib/FontIcons'
+import React,{Component} from "react";
+import Dialog from "react-md/lib/Dialogs";
+import Button from "react-md/lib/Buttons/Button";
+import TextField from "react-md/lib/TextFields";
+import Toolbar from "react-md/lib/Toolbars";
+import Head from "next/head";
+import JSONTree from "react-json-tree";
+import _ from "underscore";
+import Form from "../component/form";
 
-
-import _ from 'underscore'
-import  Form from '../component/form'
-export default class extends React.Component {
+export default class RestTest extends Component {
 
   static async getInitialProps (args) {
     return {}
@@ -25,7 +21,7 @@ export default class extends React.Component {
     this.closeDialog=this.closeDialog.bind(this)
     this.state= {
       json: {},
-      globalvar: {},
+      globalVar: {},
       paths:[],
       operations:[],
       visible:false,
@@ -59,7 +55,6 @@ export default class extends React.Component {
     temp.push({key:key,op})
     })
   this.setState({paths:temp})
-    console.log(temp)
 
   }
   _setGlobalVariable(json){
@@ -72,7 +67,7 @@ export default class extends React.Component {
       requestContentType:json.produces||[],
     }
     this.setState({
-      globalvar:obj
+      globalVar:obj
     })
 
   }
@@ -118,7 +113,7 @@ export default class extends React.Component {
           <div >
             <h2>Global Schema</h2>
 
-            <JSONTree data={this.state.globalvar}/>
+            <JSONTree data={this.state.globalVar}/>
           </div>
           {this.state.paths.map((val,i)=>(
               <div key={i}>
@@ -150,7 +145,7 @@ export default class extends React.Component {
                       title="New Event"
                       fixed
                   />
-                  <Form parameters={this.state.parameters||[]}/>
+                  <Form parameters={this.state.parameters||[]} globalVar={this.state.globalVar}/>
 
                 </Dialog>
 
