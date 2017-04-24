@@ -25,7 +25,8 @@ export default class RestTest extends Component {
       paths:[],
       operations:[],
       visible:false,
-      parameters:[]
+      parameters:[],
+      components:[]
     }
     this.json={}
 
@@ -44,17 +45,55 @@ export default class RestTest extends Component {
   }
   _setRequestUrls(path){
     let temp=[]
+    console.log(path)
+    let comp_arry=[]
 
   _.each(path,(value,key)=>{
     let op=[]
+    let comp
     if(_.isObject(value)){
       _.each(value,(operation,operationName)=>{
+        comp={}
+        comp['path']=key
+        comp['component_name']=operationName+'-'+key
+        comp['method']=operationName
+        comp={...comp,...operation}
+        delete comp['parameters']
+        _.map(operation.parameters,(param,i)=>{
+          if(param.in==='body'){
+            comp['body_param']=[...comp.body_param||{},param]
+          }
+          else if(param.in==='path'){
+            comp['path_param']=[...comp.path_param||{},param]
+          }
+          else if(param.in==='query'){
+            comp['query_param']=[...comp.query_param||{},param]
+          }
+          else if(param.in==='formData'){
+            comp['formData_param']=[...comp.formData_param||{},param]
+          }
+          else if(param.in==='header'){
+            comp['header_param']=[...comp.header_param||{},param]
+          }
+          return param
+
+        })
         op.push({key:operationName,operation})
+        comp_arry.push(comp)
       })
+
+    }
+    else{
+
     }
     temp.push({key:key,op})
     })
-  this.setState({paths:temp})
+  this.setState({
+    paths:temp,
+    components:comp_arry
+  },()=>{
+    console.log(this.state.components)
+  })
 
   }
   _setGlobalVariable(json){
@@ -72,8 +111,8 @@ export default class RestTest extends Component {
 
   }
 
-  openDialog = (parameters) => {
-    this.setState({parameters,visible:true});
+  openDialog = (c) => {
+    this.setState({render_component:c,visible:true});
   };
 
   closeDialog = () => {
@@ -115,45 +154,78 @@ export default class RestTest extends Component {
 
             <JSONTree data={this.state.globalVar}/>
           </div>
-          {this.state.paths.map((val,i)=>(
-              <div key={i}>
-                <h2>{val.key||''}</h2>
+          {/*{this.state.paths.map((val,i)=>(*/}
+              {/*<div key={i}>*/}
+                {/*<h2>{val.key||''}</h2>*/}
 
-                {val.op.map((operation,k)=>(
-                    <div key={k}>
-                      <h2>{operation.key||''}</h2>
+                {/*{val.op.map((operation,k)=>(*/}
+                    {/*<div key={k}>*/}
+                      {/*<h2>{operation.key||''}</h2>*/}
 
-                      <JSONTree data={operation.operation||''}/>
-                      <Button raised label="Try Operation"
-                              onClick={()=>this.openDialog(operation.operation.parameters)} />
+                      {/*<JSONTree data={operation.operation||''}/>*/}
+                      {/*<Button raised label="Try Operation"*/}
+                              {/*onClick={()=>this.openDialog(operation.operation.parameters)} />*/}
 
-                    </div>
-                ))
+                    {/*</div>*/}
+                {/*))*/}
 
-                }
-                <Dialog
-                    id={'Dialog'}
-                    visible={this.state.visible}
-                    fullPage
-                    aria-label="New Event"
-                    onHide={this.closeDialog}
-                >
-                  <Toolbar
-                      colored
-                      nav={nav}
-                      actions={action}
-                      title="New Event"
-                      fixed
-                  />
-                  <Form parameters={this.state.parameters||[]} globalVar={this.state.globalVar}/>
+                {/*}*/}
+                {/*<Dialog*/}
+                    {/*id={'Dialog'}*/}
+                    {/*visible={this.state.visible}*/}
+                    {/*fullPage*/}
+                    {/*aria-label="New Event"*/}
+                    {/*onHide={this.closeDialog}*/}
+                {/*>*/}
+                  {/*<Toolbar*/}
+                      {/*colored*/}
+                      {/*nav={nav}*/}
+                      {/*actions={action}*/}
+                      {/*title="New Event"*/}
+                      {/*fixed*/}
+                  {/*/>*/}
+                  {/*<Form parameters={this.state.parameters||[]} globalVar={this.state.globalVar}/>*/}
 
-                </Dialog>
+                {/*</Dialog>*/}
 
-              </div>
-          ))
+              {/*</div>*/}
+          {/*))*/}
 
+          {/*}*/}
+          <h2> Components </h2>
+          <div className="md-grid">
+
+          {
+            this.state.components.map((c,i)=>(
+                <div key={i} className="md-cell--2 md-text-center"
+                     style={{border:'1px solid grey',boxShadow:'2px 0px',
+                       cursor:'pointer',margin:'10px auto 10px auto',
+                       padding:'10px auto 10px auto'}}
+                      onClick={()=>this.openDialog(c)}><h4><u>{c.component_name}</u></h4></div>
+            ))
           }
+          </div>
+          <Dialog
+              id={'Dialog'}
+              visible={this.state.visible}
+              fullPage
+              aria-label="New Event"
+              onHide={this.closeDialog}
+          >
+            <Toolbar
+                colored
+                nav={nav}
+                actions={action}
+                title="New Event"
+                fixed
+            />
+            <div className="md-grid" style={{marginTop: '150px'}}>
+            <JSONTree data={this.state.render_component}/>
+            </div>
+
+          </Dialog>
         </div>
     )
+
   }
 }

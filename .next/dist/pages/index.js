@@ -4,6 +4,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _toConsumableArray2 = require("babel-runtime/helpers/toConsumableArray");
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+var _extends2 = require("babel-runtime/helpers/extends");
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
 
 var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -104,8 +112,8 @@ var RestTest = function (_Component) {
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (RestTest.__proto__ || (0, _getPrototypeOf2.default)(RestTest)).call(this));
 
-    _this.openDialog = function (parameters) {
-      _this.setState({ parameters: parameters, visible: true });
+    _this.openDialog = function (c) {
+      _this.setState({ render_component: c, visible: true });
     };
 
     _this.closeDialog = function () {
@@ -121,7 +129,8 @@ var RestTest = function (_Component) {
       paths: [],
       operations: [],
       visible: false,
-      parameters: []
+      parameters: [],
+      components: []
     };
     _this.json = {};
 
@@ -144,18 +153,49 @@ var RestTest = function (_Component) {
   }, {
     key: "_setRequestUrls",
     value: function _setRequestUrls(path) {
+      var _this3 = this;
+
       var temp = [];
+      console.log(path);
+      var comp_arry = [];
 
       _underscore2.default.each(path, function (value, key) {
         var op = [];
+        var comp = void 0;
         if (_underscore2.default.isObject(value)) {
           _underscore2.default.each(value, function (operation, operationName) {
+            comp = {};
+            comp['path'] = key;
+            comp['component_name'] = operationName + '-' + key;
+            comp['method'] = operationName;
+            comp = (0, _extends3.default)({}, comp, operation);
+            delete comp['parameters'];
+            _underscore2.default.map(operation.parameters, function (param, i) {
+              if (param.in === 'body') {
+                comp['body_param'] = [].concat((0, _toConsumableArray3.default)(comp.body_param || {}), [param]);
+              } else if (param.in === 'path') {
+                comp['path_param'] = [].concat((0, _toConsumableArray3.default)(comp.path_param || {}), [param]);
+              } else if (param.in === 'query') {
+                comp['query_param'] = [].concat((0, _toConsumableArray3.default)(comp.query_param || {}), [param]);
+              } else if (param.in === 'formData') {
+                comp['formData_param'] = [].concat((0, _toConsumableArray3.default)(comp.formData_param || {}), [param]);
+              } else if (param.in === 'header') {
+                comp['header_param'] = [].concat((0, _toConsumableArray3.default)(comp.header_param || {}), [param]);
+              }
+              return param;
+            });
             op.push({ key: operationName, operation: operation });
+            comp_arry.push(comp);
           });
-        }
+        } else {}
         temp.push({ key: key, op: op });
       });
-      this.setState({ paths: temp });
+      this.setState({
+        paths: temp,
+        components: comp_arry
+      }, function () {
+        console.log(_this3.state.components);
+      });
     }
   }, {
     key: "_setGlobalVariable",
@@ -175,7 +215,7 @@ var RestTest = function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       var nav = _react2.default.createElement(_Button2.default, { icon: true, onClick: this.closeDialog }, "X");
       var action = _react2.default.createElement(_Button2.default, { flat: true, label: "Save", onClick: this.closeDialog });
@@ -185,26 +225,27 @@ var RestTest = function (_Component) {
         rows: 4,
         maxRows: 4,
         onChange: this._handleSchema
-      }))), _react2.default.createElement("div", null, _react2.default.createElement("h2", null, "Full Schema"), _react2.default.createElement(_reactJsonTree2.default, { data: this.state.json })), _react2.default.createElement("div", null, _react2.default.createElement("h2", null, "Global Schema"), _react2.default.createElement(_reactJsonTree2.default, { data: this.state.globalVar })), this.state.paths.map(function (val, i) {
-        return _react2.default.createElement("div", { key: i }, _react2.default.createElement("h2", null, val.key || ''), val.op.map(function (operation, k) {
-          return _react2.default.createElement("div", { key: k }, _react2.default.createElement("h2", null, operation.key || ''), _react2.default.createElement(_reactJsonTree2.default, { data: operation.operation || '' }), _react2.default.createElement(_Button2.default, { raised: true, label: "Try Operation",
-            onClick: function onClick() {
-              return _this3.openDialog(operation.operation.parameters);
-            } }));
-        }), _react2.default.createElement(_Dialogs2.default, {
-          id: 'Dialog',
-          visible: _this3.state.visible,
-          fullPage: true,
-          "aria-label": "New Event",
-          onHide: _this3.closeDialog
-        }, _react2.default.createElement(_Toolbars2.default, {
-          colored: true,
-          nav: nav,
-          actions: action,
-          title: "New Event",
-          fixed: true
-        }), _react2.default.createElement(_form2.default, { parameters: _this3.state.parameters || [], globalVar: _this3.state.globalVar })));
-      }));
+      }))), _react2.default.createElement("div", null, _react2.default.createElement("h2", null, "Full Schema"), _react2.default.createElement(_reactJsonTree2.default, { data: this.state.json })), _react2.default.createElement("div", null, _react2.default.createElement("h2", null, "Global Schema"), _react2.default.createElement(_reactJsonTree2.default, { data: this.state.globalVar })), _react2.default.createElement("h2", null, " Components "), _react2.default.createElement("div", { className: "md-grid" }, this.state.components.map(function (c, i) {
+        return _react2.default.createElement("div", { key: i, className: "md-cell--2 md-text-center",
+          style: { border: '1px solid grey', boxShadow: '2px 0px',
+            cursor: 'pointer', margin: '10px auto 10px auto',
+            padding: '10px auto 10px auto' },
+          onClick: function onClick() {
+            return _this4.openDialog(c);
+          } }, _react2.default.createElement("h4", null, _react2.default.createElement("u", null, c.component_name)));
+      })), _react2.default.createElement(_Dialogs2.default, {
+        id: 'Dialog',
+        visible: this.state.visible,
+        fullPage: true,
+        "aria-label": "New Event",
+        onHide: this.closeDialog
+      }, _react2.default.createElement(_Toolbars2.default, {
+        colored: true,
+        nav: nav,
+        actions: action,
+        title: "New Event",
+        fixed: true
+      }), _react2.default.createElement("div", { className: "md-grid", style: { marginTop: '150px' } }, _react2.default.createElement(_reactJsonTree2.default, { data: this.state.render_component }))));
     }
   }]);
 
