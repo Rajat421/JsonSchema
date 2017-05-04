@@ -6,7 +6,9 @@ import Toolbar from "react-md/lib/Toolbars";
 import Head from "next/head";
 import JSONTree from "react-json-tree";
 import _ from "underscore";
-import Form from "../component/form";
+import {getJson} from '../component/utils'
+
+
 
 export default class RestTest extends Component {
 
@@ -34,34 +36,38 @@ export default class RestTest extends Component {
   }
 
   _handleSchema(val){
-    this.json = JSON.parse(val)
+
+    this.json = JSON.parse(val);
+    let resolvedRefSchema=getJson(this.json,this.json);
+    console.log(resolvedRefSchema,"=-=-=-=-=-=-=-=-=-=-=-=");
     this.setState({
       json:this.json
     },()=>{
-      this._setGlobalVariable(this.state.json)
-      this._setRequestUrls(this.state.json.paths)
+      this._setGlobalVariable(this.state.json);
+      this._setRequestUrls(this.state.json.paths);
     })
 
   }
   _setRequestUrls(path){
-    let temp=[]
-    console.log(path)
-    let comp_arry=[]
+    let temp=[];
+    console.log(path);
+    let comp_arry=[];
 
   _.each(path,(value,key)=>{
-    let op=[]
-    let comp
+    let op=[];
+    let comp;
     if(_.isObject(value)){
       _.each(value,(operation,operationName)=>{
-        comp={}
-        comp['path']=key
-        comp['component_name']=operationName+'-'+key
-        comp['method']=operationName
-        comp={...comp,...operation}
-        delete comp['parameters']
+        comp={};
+        comp['path']=key;
+        comp['component_name']=operationName+'-'+key;
+        comp['method']=operationName;
+        comp={...comp,...operation};
+        delete comp['parameters'];
         _.map(operation.parameters,(param,i)=>{
           if(param.in==='body'){
             comp['body_param']=[...comp.body_param||{},param]
+            console.log(param.schema,'====')
           }
           else if(param.in==='path'){
             comp['path_param']=[...comp.path_param||{},param]
@@ -96,6 +102,7 @@ export default class RestTest extends Component {
   })
 
   }
+
   _setGlobalVariable(json){
 
     let obj={
